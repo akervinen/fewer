@@ -6,10 +6,6 @@ import android.content.Intent
 import android.os.Handler
 import android.util.Log
 import android.widget.Toast
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import org.json.JSONException
-import org.json.JSONObject
 
 private const val ACTION_TEST_SERVER = "me.aleksi.fewer.action.TEST_SERVER"
 private const val EXTRA_SERVER = "me.aleksi.fewer.extra.SERVER"
@@ -43,55 +39,26 @@ class FeverServerService : IntentService("FeverServerService") {
      * parameters.
      */
     private fun handleActionTestServer(server: String?) {
-        val client = OkHttpClient()
+        if (server == null) return
+
         try {
-            val request = Request.Builder().url("$server?api").build()
-            client.newCall(request).execute().use { response ->
-                val body = response.body?.string()
-                Log.d(TAG, "Response: $body")
-                if (body == null) {
-                    handler.post {
-                        Toast.makeText(
-                            this,
-                            getString(R.string.test_error_response),
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }
-                } else {
-                    JSONObject(body).getInt("api_version")
-                    handler.post {
-                        Toast.makeText(
-                            this,
-                            getString(R.string.test_success),
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }
-                }
-            }
-        } catch (e: IllegalArgumentException) {
-            Log.w(TAG, "IllegalArgumentException: $e")
+            val client = FeverApi(server)
+            val auth = client.isAuthenticated()
+
+            Log.d(TAG, "IsAuthenticated: $auth")
             handler.post {
                 Toast.makeText(
                     this,
-                    getString(R.string.test_error_url),
+                    getString(R.string.test_success),
                     Toast.LENGTH_SHORT
                 ).show()
             }
-        } catch (e: JSONException) {
-            Log.w(TAG, "JSONException: $e")
+        } catch (e: FeverApiException) {
+            Log.w(TAG, "FeverApiException: $e")
             handler.post {
                 Toast.makeText(
                     this,
-                    getString(R.string.test_error_response_long),
-                    Toast.LENGTH_SHORT
-                ).show()
-            }
-        } catch (e: Exception) {
-            Log.w(TAG, "Exception: $e")
-            handler.post {
-                Toast.makeText(
-                    this,
-                    getString(R.string.test_error_connection, e.message),
+                    getString(R.string.test_error, e.message),
                     Toast.LENGTH_SHORT
                 ).show()
             }

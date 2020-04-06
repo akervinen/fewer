@@ -4,10 +4,7 @@
 
     <!-- Toast messages -->
     <string name="test_success">Connection successful!</string>
-    <string name="test_error_response">Invalid server response</string>
-    <string name="test_error_response_long">Invalid server response. Make sure server URL points to Fever API endpoint.</string>
-    <string name="test_error_url">Invalid server URL</string>
-    <string name="test_error_connection">Error connecting: %s</string>
+    <string name="test_error">Error connecting: %s</string>
 
     <!-- Preference Titles -->
     <string name="server_header">Server</string>
