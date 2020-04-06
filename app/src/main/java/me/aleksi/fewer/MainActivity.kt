@@ -1,22 +1,33 @@
 package me.aleksi.fewer
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.ResultReceiver
 import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
+import androidx.browser.customtabs.CustomTabsIntent
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.RecyclerView
+import me.aleksi.fewer.fever.FeedItem
 import me.aleksi.fewer.fever.FeedItemList
 import me.aleksi.fewer.fever.FeverServerService
 import me.aleksi.fewer.fever.PARAM_ITEMLIST
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), OnItemClickListener {
+    private lateinit var adapter: FeedItemAdapter
+
+    val feedItems = mutableListOf<FeedItem>()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        val list = findViewById<RecyclerView>(R.id.feedList)
+        adapter = FeedItemAdapter(feedItems, this)
+        list.adapter = adapter
 
         refresh()
     }
@@ -55,8 +66,10 @@ class MainActivity : AppCompatActivity() {
                     val items = resultData?.getParcelable<FeedItemList>(PARAM_ITEMLIST)
                     if (items != null) {
                         val adapter =
-                            findViewById<RecyclerView>(R.id.feedList)?.adapter as FeedItemRecyclerViewAdapter?
-                        adapter?.updateData(items.items)
+                            findViewById<RecyclerView>(R.id.feedList)?.adapter as FeedItemAdapter?
+                        feedItems.clear()
+                        feedItems.addAll(items.items)
+                        adapter?.notifyDataSetChanged()
                     }
                 }
                 FeverServerService.ERROR -> {
@@ -64,5 +77,10 @@ class MainActivity : AppCompatActivity() {
             }
             super.onReceiveResult(resultCode, resultData)
         }
+    }
+
+    override fun onItemClicked(item: FeedItem) {
+        val intent = CustomTabsIntent.Builder().build()
+        intent.launchUrl(this, Uri.parse(item.url))
     }
 }

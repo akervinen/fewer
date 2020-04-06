@@ -11,9 +11,10 @@ import me.aleksi.fewer.fever.FeedItem
 /**
  * [RecyclerView.Adapter] that can display a [FeedItem].
  */
-class FeedItemRecyclerViewAdapter(
-    private var values: List<FeedItem>
-) : RecyclerView.Adapter<FeedItemRecyclerViewAdapter.ViewHolder>() {
+class FeedItemAdapter(
+    private var values: MutableList<FeedItem>,
+    private val clickListener: OnItemClickListener
+) : RecyclerView.Adapter<FeedItemAdapter.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(parent.context)
@@ -23,23 +24,30 @@ class FeedItemRecyclerViewAdapter(
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = values[position]
-        holder.idView.text = item.feed_id.toString()
-        holder.contentView.text = item.title
+        holder.bind(item, clickListener)
     }
 
     override fun getItemCount(): Int = values.size
 
-    fun updateData(items: List<FeedItem>) {
-        values = items
-        notifyDataSetChanged()
-    }
-
-    inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+    inner class ViewHolder(private val view: View) : RecyclerView.ViewHolder(view) {
         val idView: TextView = view.item_number
         val contentView: TextView = view.content
+
+        fun bind(item: FeedItem, clickListener: OnItemClickListener) {
+            idView.text = item.feed_id.toString()
+            contentView.text = item.title
+
+            view.setOnClickListener {
+                clickListener.onItemClicked(item)
+            }
+        }
 
         override fun toString(): String {
             return super.toString() + " '" + contentView.text + "'"
         }
     }
+}
+
+interface OnItemClickListener {
+    fun onItemClicked(item: FeedItem)
 }
