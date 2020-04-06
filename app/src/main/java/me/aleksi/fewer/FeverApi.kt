@@ -1,10 +1,11 @@
 package me.aleksi.fewer
 
+import com.squareup.moshi.JsonDataException
+import com.squareup.moshi.Moshi
 import okhttp3.FormBody
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import org.json.JSONException
-import org.json.JSONObject
+import java.io.IOException
 import java.security.MessageDigest
 
 fun hashUserPassword(username: String, password: String): String {
@@ -20,6 +21,7 @@ class FeverApiException : Exception {
 
 class FeverApi(private val serverPath: String, private val hash: String) : FeedApi {
     private val httpClient: OkHttpClient = OkHttpClient()
+    private val moshi: Moshi = Moshi.Builder().build()
 
     override fun isAuthenticated(): Boolean {
         try {
@@ -35,11 +37,13 @@ class FeverApi(private val serverPath: String, private val hash: String) : FeedA
                 val body =
                     response.body?.string() ?: throw FeverApiException("Empty server response")
 
-                return JSONObject(body).getInt("auth") == 1
+                return moshi.adapter(FeverAuthResponse::class.java).fromJson(body)?.auth == 1
             }
         } catch (e: IllegalArgumentException) {
             throw FeverApiException("Invalid server URL", e)
-        } catch (e: JSONException) {
+        } catch (e: IOException) {
+            throw FeverApiException("Invalid server response", e)
+        } catch (e: JsonDataException) {
             throw FeverApiException("Invalid server response", e)
         } catch (e: Exception) {
             throw FeverApiException(e.message ?: e.toString(), e)
