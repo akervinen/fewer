@@ -9,6 +9,7 @@ import android.widget.Toast
 
 private const val ACTION_TEST_SERVER = "me.aleksi.fewer.action.TEST_SERVER"
 private const val EXTRA_SERVER = "me.aleksi.fewer.extra.SERVER"
+private const val EXTRA_HASH = "me.aleksi.fewer.extra.HASH"
 
 private const val TAG = "FeverServerService"
 
@@ -29,7 +30,8 @@ class FeverServerService : IntentService("FeverServerService") {
         when (intent?.action) {
             ACTION_TEST_SERVER -> {
                 val server = intent.getStringExtra(EXTRA_SERVER)
-                handleActionTestServer(server)
+                val hash = intent.getStringExtra(EXTRA_HASH)
+                handleActionTestServer(server, hash)
             }
         }
     }
@@ -38,18 +40,24 @@ class FeverServerService : IntentService("FeverServerService") {
      * Handle action Foo in the provided background thread with the provided
      * parameters.
      */
-    private fun handleActionTestServer(server: String?) {
+    private fun handleActionTestServer(server: String?, hash: String?) {
         if (server == null) return
 
         try {
-            val client = FeverApi(server)
+            val client = FeverApi(server, hash.orEmpty())
             val auth = client.isAuthenticated()
 
             Log.d(TAG, "IsAuthenticated: $auth")
             handler.post {
                 Toast.makeText(
                     this,
-                    getString(R.string.test_success),
+                    getString(
+                        if (auth) {
+                            R.string.test_success
+                        } else {
+                            R.string.test_noauth
+                        }
+                    ),
                     Toast.LENGTH_SHORT
                 ).show()
             }
@@ -73,10 +81,11 @@ class FeverServerService : IntentService("FeverServerService") {
          * @see IntentService
          */
         @JvmStatic
-        fun startActionTestServer(context: Context, server: String) {
+        fun startActionTestServer(context: Context, server: String, hash: String?) {
             val intent = Intent(context, FeverServerService::class.java).apply {
                 action = ACTION_TEST_SERVER
                 putExtra(EXTRA_SERVER, server)
+                putExtra(EXTRA_HASH, hash)
             }
             context.startService(intent)
         }

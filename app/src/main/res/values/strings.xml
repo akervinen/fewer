@@ -2,14 +2,25 @@
     <string name="app_name">Fewer</string>
     <string name="title_activity_settings">Settings</string>
 
+    <!-- Preference keys -->
+    <string name="pref_server">server</string>
+    <string name="pref_serverTest">serverTest</string>
+    <string name="pref_username">username</string>
+    <string name="pref_password">password</string>
+    <string name="pref_hash">hash</string>
+
     <!-- Toast messages -->
     <string name="test_success">Connection successful!</string>
+    <string name="test_noauth">Invalid username or password</string>
     <string name="test_error">Error connecting: %s</string>
 
     <!-- Preference Titles -->
     <string name="server_header">Server</string>
 
-    <!-- Messages Preferences -->
+    <!-- Preferences -->
     <string name="server_title">Fever Server URL</string>
+    <string name="username_title">Username</string>
+    <string name="password_title">Password</string>
+    <string name="password_summary">Set your API password</string>
     <string name="server_test_title">Test Server</string>
 </resources>

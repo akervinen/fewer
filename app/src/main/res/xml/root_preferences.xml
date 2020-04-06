@@ -4,12 +4,27 @@
     <PreferenceCategory android:title="@string/server_header">
         <EditTextPreference
             android:inputType="none"
-            app:key="server"
+            app:key="@string/pref_server"
             app:title="@string/server_title"
             app:useSimpleSummaryProvider="true" />
 
+        <EditTextPreference
+            app:key="@string/pref_username"
+            app:title="@string/username_title"
+            app:useSimpleSummaryProvider="true" />
+
+        <EditTextPreference
+            android:inputType="textPassword"
+            app:key="@string/pref_password"
+            app:summary="@string/password_summary"
+            app:title="@string/password_title" />
+
+        <EditTextPreference
+            app:isPreferenceVisible="false"
+            app:key="@string/pref_hash" />
+
         <Preference
-            app:key="serverTest"
+            app:key="@string/pref_serverTest"
             app:title="@string/server_test_title" />
     </PreferenceCategory>
 </PreferenceScreen>

@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.EditTextPreference
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
+import androidx.preference.PreferenceManager
 
 class SettingsActivity : AppCompatActivity() {
 
@@ -25,7 +26,7 @@ class SettingsActivity : AppCompatActivity() {
         override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
             setPreferencesFromResource(R.xml.root_preferences, rootKey)
 
-            val serverPref = findPreference<EditTextPreference>("server")
+            val serverPref = findPreference<EditTextPreference>(getString(R.string.pref_server))
             if (serverPref != null) {
                 serverPref.setOnBindEditTextListener { editText ->
                     editText.inputType = InputType.TYPE_TEXT_VARIATION_URI
@@ -45,13 +46,41 @@ class SettingsActivity : AppCompatActivity() {
                     }
             }
 
-            val testButton = findPreference<Preference>("serverTest")
+            val passPref = findPreference<EditTextPreference>(getString(R.string.pref_password))
+            if (passPref != null) {
+                passPref.setOnBindEditTextListener { editText ->
+                    editText.inputType = InputType.TYPE_TEXT_VARIATION_PASSWORD
+                }
+                passPref.onPreferenceChangeListener =
+                    Preference.OnPreferenceChangeListener { preference: Preference, password: Any ->
+                        val textPref = preference as EditTextPreference
+                        textPref.text = ""
+
+                        val sharedPreferences =
+                            PreferenceManager.getDefaultSharedPreferences(context)
+                        val username =
+                            sharedPreferences.getString(getString(R.string.pref_username), "")
+
+                        findPreference<EditTextPreference>(getString(R.string.pref_hash))?.let { pref ->
+                            pref.text = hashUserPassword(username!!, password.toString())
+                        }
+
+                        return@OnPreferenceChangeListener false
+                    }
+            }
+
+            val testButton = findPreference<Preference>(getString(R.string.pref_serverTest))
             if (testButton != null) {
                 testButton.onPreferenceClickListener = Preference.OnPreferenceClickListener {
                     context?.let { context ->
-                        findPreference<EditTextPreference>("server")?.text?.let { text ->
-                            FeverServerService.startActionTestServer(context, text)
-                        }
+                        val sharedPreferences =
+                            PreferenceManager.getDefaultSharedPreferences(context)
+                        val server =
+                            sharedPreferences.getString(getString(R.string.pref_server), "")
+                        val hash =
+                            sharedPreferences.getString(getString(R.string.pref_hash), "")
+
+                        FeverServerService.startActionTestServer(context, server!!, hash)
                     }
                     return@OnPreferenceClickListener true
                 }
