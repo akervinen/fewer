@@ -7,6 +7,8 @@ import androidx.preference.EditTextPreference
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.PreferenceManager
+import me.aleksi.fewer.fever.FeverServerService
+import me.aleksi.fewer.fever.hashUserPassword
 
 class SettingsActivity : AppCompatActivity() {
 
@@ -62,7 +64,10 @@ class SettingsActivity : AppCompatActivity() {
                             sharedPreferences.getString(getString(R.string.pref_username), "")
 
                         findPreference<EditTextPreference>(getString(R.string.pref_hash))?.let { pref ->
-                            pref.text = hashUserPassword(username!!, password.toString())
+                            pref.text = hashUserPassword(
+                                username!!,
+                                password.toString()
+                            )
                         }
 
                         return@OnPreferenceChangeListener false

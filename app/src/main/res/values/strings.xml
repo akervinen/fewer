@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">Fewer</string>
     <string name="title_activity_settings">Settings</string>
+    <string name="title_activity_refresh">Refresh</string>
 
     <!-- Preference keys -->
     <string name="pref_server">server</string>
