@@ -1,0 +1,15 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory android:title="@string/server_header">
+        <EditTextPreference
+            android:inputType="none"
+            app:key="server"
+            app:title="@string/server_title"
+            app:useSimpleSummaryProvider="true" />
+
+        <Preference
+            app:key="serverTest"
+            app:title="@string/server_test_title" />
+    </PreferenceCategory>
+</PreferenceScreen>
