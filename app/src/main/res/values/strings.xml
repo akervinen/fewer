@@ -3,6 +3,9 @@
     <string name="title_activity_settings">Settings</string>
     <string name="title_activity_refresh">Refresh</string>
 
+    <!-- Nav titles -->
+    <string name="title_all_feeds">All Feeds</string>
+
     <!-- Preference keys -->
     <string name="pref_server">server</string>
     <string name="pref_serverTest">serverTest</string>

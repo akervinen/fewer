@@ -104,8 +104,6 @@ class FeverServerService : IntentService("FeverServerService") {
         }
     }
 
-
-
     companion object {
         const val SUCCESS = 1313
         const val ERROR = 4242
@@ -133,7 +131,12 @@ class FeverServerService : IntentService("FeverServerService") {
          * @see IntentService
          */
         @JvmStatic
-        fun startActionGetItems(context: Context, server: String, hash: String?, receiver: ResultReceiver) {
+        fun startActionGetItems(
+            context: Context,
+            server: String,
+            hash: String?,
+            receiver: ResultReceiver
+        ) {
             val intent = Intent(context, FeverServerService::class.java).apply {
                 action = ACTION_GET_ITEMS
                 putExtra(EXTRA_SERVER, server)

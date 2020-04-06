@@ -1,44 +1,31 @@
 package me.aleksi.fewer
 
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
-import android.os.Handler
-import android.os.ResultReceiver
 import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
-import androidx.browser.customtabs.CustomTabsIntent
-import androidx.preference.PreferenceManager
-import androidx.recyclerview.widget.RecyclerView
-import me.aleksi.fewer.fever.FeedItem
-import me.aleksi.fewer.fever.FeedItemList
-import me.aleksi.fewer.fever.FeverServerService
-import me.aleksi.fewer.fever.PARAM_ITEMLIST
+import androidx.navigation.findNavController
+import androidx.navigation.ui.AppBarConfiguration
+import androidx.navigation.ui.navigateUp
+import androidx.navigation.ui.setupActionBarWithNavController
+import androidx.navigation.ui.setupWithNavController
+import com.google.android.material.navigation.NavigationView
 
-class MainActivity : AppCompatActivity(), OnItemClickListener {
-    private lateinit var adapter: FeedItemAdapter
-
-    val feedItems = mutableListOf<FeedItem>()
+class MainActivity : AppCompatActivity() {
+    private lateinit var appBarConfiguration: AppBarConfiguration
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val list = findViewById<RecyclerView>(R.id.feedList)
-        adapter = FeedItemAdapter(feedItems, this)
-        list.adapter = adapter
+        setSupportActionBar(findViewById(R.id.toolbar))
 
-        refresh()
-    }
-
-    private fun refresh() {
-        val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
-        val server = sharedPreferences.getString(getString(R.string.pref_server), "")
-        val hash = sharedPreferences.getString(getString(R.string.pref_hash), "")
-
-        val receiver = ItemReceiver(Handler())
-        FeverServerService.startActionGetItems(this, server!!, hash, receiver)
+        val navController = findNavController(R.id.nav_host_fragment)
+        appBarConfiguration =
+            AppBarConfiguration(navController.graph, findViewById(R.id.drawer_layout))
+        setupActionBarWithNavController(navController, appBarConfiguration)
+        findViewById<NavigationView>(R.id.nav_view).setupWithNavController(navController)
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -51,36 +38,12 @@ class MainActivity : AppCompatActivity(), OnItemClickListener {
             R.id.settingsAction -> {
                 startActivity(Intent(this, SettingsActivity::class.java))
             }
-            R.id.refreshAction -> {
-                refresh()
-            }
         }
-
         return super.onOptionsItemSelected(item)
     }
 
-    private inner class ItemReceiver(handler: Handler) : ResultReceiver(handler) {
-        override fun onReceiveResult(resultCode: Int, resultData: Bundle?) {
-            when (resultCode) {
-                FeverServerService.SUCCESS -> {
-                    val items = resultData?.getParcelable<FeedItemList>(PARAM_ITEMLIST)
-                    if (items != null) {
-                        val adapter =
-                            findViewById<RecyclerView>(R.id.feedList)?.adapter as FeedItemAdapter?
-                        feedItems.clear()
-                        feedItems.addAll(items.items)
-                        adapter?.notifyDataSetChanged()
-                    }
-                }
-                FeverServerService.ERROR -> {
-                }
-            }
-            super.onReceiveResult(resultCode, resultData)
-        }
-    }
-
-    override fun onItemClicked(item: FeedItem) {
-        val intent = CustomTabsIntent.Builder().build()
-        intent.launchUrl(this, Uri.parse(item.url))
+    override fun onSupportNavigateUp(): Boolean {
+        return findNavController(R.id.nav_host_fragment).navigateUp(appBarConfiguration)
+                || super.onSupportNavigateUp()
     }
 }
