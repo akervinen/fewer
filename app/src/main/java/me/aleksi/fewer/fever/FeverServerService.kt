@@ -17,6 +17,8 @@ private const val ACTION_GET_FEEDS = "me.aleksi.fewer.action.GET_FEEDS"
 private const val EXTRA_SERVER = "me.aleksi.fewer.extra.SERVER"
 private const val EXTRA_HASH = "me.aleksi.fewer.extra.HASH"
 private const val EXTRA_RECEIVER = "me.aleksi.fewer.extra.RECEIVER"
+private const val EXTRA_FEED_ID = "me.aleksi.fewer.extra.FEED_ID"
+private const val EXTRA_MAX_ID = "me.aleksi.fewer.extra.MAX_ID"
 
 const val PARAM_ITEMLIST = "me.aleksi.fewer.param.ITEMLIST"
 const val PARAM_FEEDLIST = "me.aleksi.fewer.param.FEEDLIST"
@@ -47,7 +49,15 @@ class FeverServerService : IntentService("FeverServerService") {
                 handleActionTestServer(server, hash)
             }
             ACTION_GET_ITEMS -> {
-                handleActionGetItems(server, hash, receiver)
+                val maxId = if (intent.hasExtra(EXTRA_MAX_ID)) intent.getLongExtra(
+                    EXTRA_MAX_ID,
+                    0
+                ) else null
+                val feedId = if (intent.hasExtra(EXTRA_FEED_ID)) intent.getLongExtra(
+                    EXTRA_FEED_ID,
+                    0
+                ) else null
+                handleActionGetItems(server, hash, maxId, feedId, receiver)
             }
             ACTION_GET_FEEDS -> {
                 handleActionGetFeeds(server, hash, receiver)
@@ -88,12 +98,18 @@ class FeverServerService : IntentService("FeverServerService") {
         }
     }
 
-    private fun handleActionGetItems(server: String?, hash: String?, receiver: ResultReceiver?) {
+    private fun handleActionGetItems(
+        server: String?,
+        hash: String?,
+        maxId: Long?,
+        feedId: Long?,
+        receiver: ResultReceiver?
+    ) {
         if (server == null) return
 
         try {
             val client = FeverApi(server, hash.orEmpty())
-            val items = client.items()
+            val items = client.items(maxId, feedId)
 
             val bundle = Bundle()
             bundle.putParcelable(PARAM_ITEMLIST, items)
@@ -163,12 +179,18 @@ class FeverServerService : IntentService("FeverServerService") {
             context: Context,
             server: String,
             hash: String?,
+            maxId: Long?,
+            feedId: Long?,
             receiver: ResultReceiver
         ) {
             val intent = Intent(context, FeverServerService::class.java).apply {
                 action = ACTION_GET_ITEMS
                 putExtra(EXTRA_SERVER, server)
                 putExtra(EXTRA_HASH, hash)
+                if (maxId != null)
+                    putExtra(EXTRA_MAX_ID, maxId)
+                if (feedId != null)
+                    putExtra(EXTRA_FEED_ID, feedId)
                 putExtra(EXTRA_RECEIVER, receiver)
             }
             context.startService(intent)

@@ -77,11 +77,15 @@ class FeverApi(private val serverPath: String, private val hash: String) :
         )?.auth == 1
     }
 
-    override fun items(): FeedItemList {
-        val reqBody = FormBody.Builder()
+    override fun items(maxId: Long?, feedId: Long?): FeedItemList {
+        val reqBodyBuilder = FormBody.Builder()
             .add("api_key", hash)
-            .add("max_id", "9999999999999999")
-            .build()
+            .add("max_id", maxId?.toString() ?: "9999999999999999")
+
+        if (feedId != null)
+            reqBodyBuilder.add("feed_ids", feedId.toString())
+
+        val reqBody = reqBodyBuilder.build()
 
         return moshi.adapter(FeedItemList::class.java).fromJson(
             doCall("$serverPath?api&items", reqBody)

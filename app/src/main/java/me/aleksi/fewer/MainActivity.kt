@@ -16,6 +16,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.core.view.GravityCompat
 import androidx.preference.PreferenceManager
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.app_bar_main.*
@@ -29,9 +30,13 @@ class MainActivity : AppCompatActivity(), OnItemClickListener {
     private val feedGroups = mutableListOf<FeedGroup>()
 
     private val feedAdapter = FeedListAdapter(feedGroups)
-    private val feedItemAdapter = FeedItemAdapter(feedItemsFiltered, this)
+    private val feedItemAdapter = FeedItemAdapter(feedItems, this)
 
     private var activeFeed: Feed? = null
+
+    private var maxItemId: Long? = null
+
+    private lateinit var scrollLoader: RecyclerScrollLoader
 
     private lateinit var feedItemList: RecyclerView
     private lateinit var actionBarDrawerToggle: ActionBarDrawerToggle
@@ -46,10 +51,15 @@ class MainActivity : AppCompatActivity(), OnItemClickListener {
         feedItemList = feed
         feedItemList.adapter = feedItemAdapter
 
+        scrollLoader = RecyclerScrollLoader(feedItemList.layoutManager as LinearLayoutManager) {
+            loadMore()
+        }
+
+        feedItemList.addOnScrollListener(scrollLoader)
+
         feedAdapter.onFeedClick = {
             Log.d("TAG", "Feed clicked: ${it.title}")
-            activeFeed = it
-            filterFeedItems(activeFeed)
+            setActiveFeed(it)
 
             drawer_layout.closeDrawer(GravityCompat.START)
         }
@@ -89,12 +99,24 @@ class MainActivity : AppCompatActivity(), OnItemClickListener {
         feedAdapter.onRestoreInstanceState(savedInstanceState)
     }
 
-    private fun refresh() {
+    private fun loadMore() {
         val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
         val server = sharedPreferences.getString(getString(R.string.pref_server), "")
         val hash = sharedPreferences.getString(getString(R.string.pref_hash), "")
 
-        FeverServerService.startActionGetItems(this, server!!, hash, FeedItemReceiver(Handler()))
+        FeverServerService.startActionGetItems(
+            this,
+            server!!,
+            hash,
+            maxItemId,
+            activeFeed?.id,
+            FeedItemReceiver(maxItemId != null, Handler())
+        )
+    }
+
+    private fun refresh() {
+        maxItemId = null
+        loadMore()
     }
 
     private fun refreshFeedList() {
@@ -105,26 +127,37 @@ class MainActivity : AppCompatActivity(), OnItemClickListener {
         FeverServerService.startActionGetFeeds(this, server!!, hash, FeedGroupReceiver(Handler()))
     }
 
-    fun clearFilter(view: View) {
-        activeFeed = null
-        filterFeedItems(null)
+    fun setActiveFeed(feed: Feed?) {
+        if (feed != activeFeed) {
+            activeFeed = feed
+            refresh()
+        }
+    }
+
+    fun clickAllFeeds(view: View) {
+        setActiveFeed(null)
         drawer_layout.closeDrawer(GravityCompat.START)
     }
 
     private fun addFeedItems(items: List<FeedItem>) {
-        feedItems.clear()
+        scrollLoader.loading = false
+        scrollLoader.moreToLoad = items.isNotEmpty()
+
+        val posStart = feedItems.size
+
         feedItems.addAll(items)
 
-        filterFeedItems(activeFeed)
+        if (items.isNotEmpty()) {
+            maxItemId = items.last().id
+        }
+        feedItemAdapter.notifyItemRangeInserted(posStart, items.size)
     }
 
-    private fun filterFeedItems(feedToShow: Feed?) {
+    private fun setFeedItems(items: List<FeedItem>) {
+        feedItems.clear()
         feedItemsFiltered.clear()
-        if (feedToShow != null) {
-            feedItemsFiltered.addAll(feedItems.filter { it.feed_id == feedToShow.id })
-        } else {
-            feedItemsFiltered.addAll(feedItems)
-        }
+
+        addFeedItems(items)
         feedItemAdapter.notifyDataSetChanged()
     }
 
@@ -162,12 +195,16 @@ class MainActivity : AppCompatActivity(), OnItemClickListener {
         CustomTabsIntent.Builder().build().launchUrl(this, Uri.parse(item.url))
     }
 
-    private inner class FeedItemReceiver(handler: Handler) : ResultReceiver(handler) {
+    private inner class FeedItemReceiver(private val addItems: Boolean, handler: Handler) :
+        ResultReceiver(handler) {
         override fun onReceiveResult(resultCode: Int, resultData: Bundle?) {
             when (resultCode) {
                 FeverServerService.SUCCESS -> {
                     resultData?.getParcelable<FeedItemList>(PARAM_ITEMLIST)?.let {
-                        addFeedItems(it.items)
+                        if (addItems)
+                            addFeedItems(it.items)
+                        else
+                            setFeedItems(it.items)
                     }
                 }
                 FeverServerService.ERROR -> {

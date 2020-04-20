@@ -36,7 +36,7 @@
             android:layout_height="wrap_content"
             android:background="?selectableItemBackground"
             android:minHeight="64dp"
-            android:onClick="clearFilter"
+            android:onClick="clickAllFeeds"
             android:padding="16dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
