@@ -10,6 +10,7 @@ import android.os.ResultReceiver
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.browser.customtabs.CustomTabsIntent
@@ -78,6 +79,16 @@ class MainActivity : AppCompatActivity(), OnItemClickListener {
         actionBarDrawerToggle.onConfigurationChanged(newConfig)
     }
 
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        feedAdapter.onSaveInstanceState(outState)
+    }
+
+    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
+        super.onRestoreInstanceState(savedInstanceState)
+        feedAdapter.onRestoreInstanceState(savedInstanceState)
+    }
+
     private fun refresh() {
         val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
         val server = sharedPreferences.getString(getString(R.string.pref_server), "")
@@ -92,6 +103,12 @@ class MainActivity : AppCompatActivity(), OnItemClickListener {
         val hash = sharedPreferences.getString(getString(R.string.pref_hash), "")
 
         FeverServerService.startActionGetFeeds(this, server!!, hash, FeedGroupReceiver(Handler()))
+    }
+
+    fun clearFilter(view: View) {
+        activeFeed = null
+        filterFeedItems(null)
+        drawer_layout.closeDrawer(GravityCompat.START)
     }
 
     private fun addFeedItems(items: List<FeedItem>) {
