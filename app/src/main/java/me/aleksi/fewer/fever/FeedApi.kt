@@ -4,4 +4,6 @@ interface FeedApi {
     fun isAuthenticated(): Boolean
 
     fun items(): FeedItemList
+
+    fun feeds(): List<FeedGroup>
 }

@@ -11,8 +11,6 @@ import androidx.browser.customtabs.CustomTabsIntent
 import androidx.fragment.app.Fragment
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.RecyclerView
-import me.aleksi.fewer.FeedItemAdapter
-import me.aleksi.fewer.OnItemClickListener
 import me.aleksi.fewer.R
 import me.aleksi.fewer.fever.FeedItem
 import me.aleksi.fewer.fever.FeedItemList
@@ -32,9 +30,9 @@ class FeedFragment : Fragment(), OnItemClickListener {
     ): View? {
         root = inflater.inflate(R.layout.fragment_all_feeds, container, false)
 
-        val list = root.findViewById<RecyclerView>(R.id.feedList)
+        val list = root as RecyclerView
         adapter = FeedItemAdapter(feedItems, this)
-        list?.adapter = adapter
+        list.adapter = adapter
 
         refresh()
 
@@ -58,10 +56,10 @@ class FeedFragment : Fragment(), OnItemClickListener {
                 FeverServerService.SUCCESS -> {
                     resultData?.getParcelable<FeedItemList>(PARAM_ITEMLIST)?.let {
                         val adapter =
-                            root.findViewById<RecyclerView>(R.id.feedList)?.adapter as FeedItemAdapter?
+                            (root as RecyclerView).adapter as FeedItemAdapter
                         feedItems.clear()
                         feedItems.addAll(it.items)
-                        adapter?.notifyDataSetChanged()
+                        adapter.notifyDataSetChanged()
                     }
                 }
                 FeverServerService.ERROR -> {

@@ -12,12 +12,15 @@ import me.aleksi.fewer.R
 
 private const val ACTION_TEST_SERVER = "me.aleksi.fewer.action.TEST_SERVER"
 private const val ACTION_GET_ITEMS = "me.aleksi.fewer.action.GET_ITEMS"
+private const val ACTION_GET_FEEDS = "me.aleksi.fewer.action.GET_FEEDS"
 
 private const val EXTRA_SERVER = "me.aleksi.fewer.extra.SERVER"
 private const val EXTRA_HASH = "me.aleksi.fewer.extra.HASH"
 private const val EXTRA_RECEIVER = "me.aleksi.fewer.extra.RECEIVER"
 
 const val PARAM_ITEMLIST = "me.aleksi.fewer.param.ITEMLIST"
+const val PARAM_FEEDLIST = "me.aleksi.fewer.param.FEEDLIST"
+const val PARAM_GROUPLIST = "me.aleksi.fewer.param.GROUPLIST"
 
 private const val TAG = "FeverServerService"
 
@@ -45,6 +48,9 @@ class FeverServerService : IntentService("FeverServerService") {
             }
             ACTION_GET_ITEMS -> {
                 handleActionGetItems(server, hash, receiver)
+            }
+            ACTION_GET_FEEDS -> {
+                handleActionGetFeeds(server, hash, receiver)
             }
         }
     }
@@ -104,6 +110,28 @@ class FeverServerService : IntentService("FeverServerService") {
         }
     }
 
+    private fun handleActionGetFeeds(server: String?, hash: String?, receiver: ResultReceiver?) {
+        if (server == null) return
+
+        try {
+            val client = FeverApi(server, hash.orEmpty())
+            val feeds = client.feeds()
+
+            val bundle = Bundle()
+            bundle.putParcelableArrayList(PARAM_FEEDLIST, ArrayList(feeds))
+            receiver?.send(SUCCESS, bundle)
+        } catch (e: FeverApiException) {
+            Log.w(TAG, "FeverApiException: $e")
+            handler.post {
+                Toast.makeText(
+                    this,
+                    getString(R.string.test_error, e.message),
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
+    }
+
     companion object {
         const val SUCCESS = 1313
         const val ERROR = 4242
@@ -139,6 +167,22 @@ class FeverServerService : IntentService("FeverServerService") {
         ) {
             val intent = Intent(context, FeverServerService::class.java).apply {
                 action = ACTION_GET_ITEMS
+                putExtra(EXTRA_SERVER, server)
+                putExtra(EXTRA_HASH, hash)
+                putExtra(EXTRA_RECEIVER, receiver)
+            }
+            context.startService(intent)
+        }
+
+        @JvmStatic
+        fun startActionGetFeeds(
+            context: Context,
+            server: String,
+            hash: String?,
+            receiver: ResultReceiver
+        ) {
+            val intent = Intent(context, FeverServerService::class.java).apply {
+                action = ACTION_GET_FEEDS
                 putExtra(EXTRA_SERVER, server)
                 putExtra(EXTRA_HASH, hash)
                 putExtra(EXTRA_RECEIVER, receiver)
