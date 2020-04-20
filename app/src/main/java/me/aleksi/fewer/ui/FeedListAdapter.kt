@@ -11,10 +11,12 @@ import com.thoughtbot.expandablerecyclerview.viewholders.GroupViewHolder
 import me.aleksi.fewer.R
 import me.aleksi.fewer.fever.Feed
 
-class FeedAdapter(groups: List<FeedGroup>) :
-    ExpandableRecyclerViewAdapter<FeedAdapter.FeedGroupViewHolder, FeedAdapter.FeedViewHolder>(
+class FeedListAdapter(groups: List<FeedGroup>) :
+    ExpandableRecyclerViewAdapter<FeedListAdapter.FeedGroupViewHolder, FeedListAdapter.FeedViewHolder>(
         groups
     ) {
+
+    var onFeedClick: ((feed: Feed) -> Unit)? = null
 
     override fun onCreateGroupViewHolder(parent: ViewGroup?, viewType: Int): FeedGroupViewHolder {
         val view = LayoutInflater.from(parent!!.context)
@@ -34,7 +36,12 @@ class FeedAdapter(groups: List<FeedGroup>) :
         group: ExpandableGroup<*>?,
         childIndex: Int
     ) {
-        holder?.setFeedTitle(group?.items?.get(childIndex) as Feed)
+        with(holder!!) {
+            (group?.items?.get(childIndex) as Feed).let { feed: Feed ->
+                setFeedTitle(feed)
+                setOnClick(View.OnClickListener { onFeedClick?.invoke(feed) })
+            }
+        }
     }
 
     override fun onBindGroupViewHolder(
@@ -43,6 +50,14 @@ class FeedAdapter(groups: List<FeedGroup>) :
         group: ExpandableGroup<*>?
     ) {
         holder?.setGroupTitle(group)
+    }
+
+    fun expandAll() {
+        groups.forEachIndexed { index, _ ->
+            if (!isGroupExpanded(index)) {
+                toggleGroup(index)
+            }
+        }
     }
 
     class FeedGroupViewHolder(itemView: View) : GroupViewHolder(itemView) {
@@ -55,6 +70,10 @@ class FeedAdapter(groups: List<FeedGroup>) :
 
     class FeedViewHolder(itemView: View) : ChildViewHolder(itemView) {
         private val feedTitle: TextView = itemView.findViewById(R.id.feedList_feedTitle)
+
+        fun setOnClick(listener: View.OnClickListener?) {
+            itemView.setOnClickListener(listener)
+        }
 
         fun setFeedTitle(feed: Feed) {
             feedTitle.text = feed.title

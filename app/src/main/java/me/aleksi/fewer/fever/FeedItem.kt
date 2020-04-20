@@ -8,7 +8,7 @@ import kotlinx.android.parcel.Parcelize
 @JsonClass(generateAdapter = true)
 data class FeedItem(
     val id: Long,
-    val feed_id: Int,
+    val feed_id: Long,
     val title: String,
     val author: String,
     val html: String,
