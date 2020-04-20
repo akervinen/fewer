@@ -17,7 +17,9 @@
         android:layout_width="@dimen/nav_width"
         android:layout_height="match_parent"
         android:layout_gravity="start"
-        android:background="@color/colorBackground">
+        android:background="@color/colorBackground"
+        android:clickable="true"
+        android:focusable="true">
 
         <include
             android:id="@+id/drawer_header"
@@ -33,11 +35,11 @@
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:paddingTop="16dp"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/drawer_header"
-            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+            app:layout_constraintTop_toBottomOf="@+id/drawer_header" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.drawerlayout.widget.DrawerLayout>
