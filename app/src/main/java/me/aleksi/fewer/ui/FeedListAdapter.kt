@@ -3,9 +3,13 @@ package me.aleksi.fewer.ui
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.Animation.RELATIVE_TO_SELF
+import android.view.animation.RotateAnimation
+import android.widget.ImageView
 import android.widget.TextView
 import com.thoughtbot.expandablerecyclerview.ExpandableRecyclerViewAdapter
 import com.thoughtbot.expandablerecyclerview.models.ExpandableGroup
+import com.thoughtbot.expandablerecyclerview.models.ExpandableListPosition
 import com.thoughtbot.expandablerecyclerview.viewholders.ChildViewHolder
 import com.thoughtbot.expandablerecyclerview.viewholders.GroupViewHolder
 import me.aleksi.fewer.R
@@ -50,21 +54,44 @@ class FeedListAdapter(groups: List<FeedGroup>) :
         group: ExpandableGroup<*>?
     ) {
         holder?.setGroupTitle(group)
+        holder?.expand()
     }
 
     fun expandAll() {
         groups.forEachIndexed { index, _ ->
-            if (!isGroupExpanded(index)) {
-                toggleGroup(index)
+            val groupIdx = expandableList.getFlattenedGroupIndex(
+                ExpandableListPosition.obtain(ExpandableListPosition.GROUP, index, 0, 0)
+            )
+            if (!isGroupExpanded(groupIdx)) {
+                onGroupClick(groupIdx)
             }
         }
     }
 
     class FeedGroupViewHolder(itemView: View) : GroupViewHolder(itemView) {
+        private val arrowIcon: ImageView = itemView.findViewById(R.id.feedList_groupIcon)
         private val groupTitle: TextView = itemView.findViewById(R.id.feedList_groupTitle)
 
         fun setGroupTitle(group: ExpandableGroup<*>?) {
             groupTitle.text = group?.title ?: "und"
+        }
+
+        override fun expand() {
+            super.expand()
+
+            val anim = RotateAnimation(180f, 360f, RELATIVE_TO_SELF, .5f, RELATIVE_TO_SELF, .5f)
+            anim.duration = 300
+            anim.fillAfter = true
+            arrowIcon.animation = anim
+        }
+
+        override fun collapse() {
+            super.collapse()
+
+            val anim = RotateAnimation(360f, 180f, RELATIVE_TO_SELF, .5f, RELATIVE_TO_SELF, .5f)
+            anim.duration = 300
+            anim.fillAfter = true
+            arrowIcon.animation = anim
         }
     }
 

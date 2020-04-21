@@ -4,15 +4,16 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="?selectableItemBackground"
-    android:minHeight="64dp"
+    android:minHeight="48dp"
     android:padding="16dp">
 
-    <TextView
-        android:id="@+id/feedList_groupPrefix"
-        android:layout_width="wrap_content"
-        android:layout_height="0dp"
-        android:gravity="center_vertical"
-        android:text="Group: "
+    <ImageView
+        android:id="@+id/feedList_groupIcon"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:contentDescription="@string/title_all_feeds"
+        android:foregroundGravity="center_vertical"
+        android:src="@drawable/ic_baseline_expand_more_24"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -21,10 +22,11 @@
         android:id="@+id/feedList_groupTitle"
         android:layout_width="0dp"
         android:layout_height="match_parent"
+        android:layout_marginStart="8dp"
         android:gravity="center_vertical"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/feedList_groupPrefix"
+        app:layout_constraintStart_toEndOf="@+id/feedList_groupIcon"
         app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

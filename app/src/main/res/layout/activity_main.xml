@@ -24,7 +24,7 @@
         <include
             android:id="@+id/drawer_header"
             layout="@layout/fragment_drawer_header"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="@dimen/nav_header_height"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -35,22 +35,33 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="?selectableItemBackground"
-            android:minHeight="64dp"
+            android:minHeight="48dp"
             android:onClick="clickAllFeeds"
             android:padding="16dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/drawer_header">
 
-            <TextView
-                android:id="@+id/feedList_groupTitle"
+            <ImageView
+                android:id="@+id/feedList_feedIcon"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
+                android:contentDescription="@string/title_all_feeds"
+                android:foregroundGravity="center_vertical"
+                android:src="@drawable/ic_baseline_list_24"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/feedList_feedTitle"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_marginStart="8dp"
                 android:gravity="center_vertical"
                 android:text="@string/title_all_feeds"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/feedList_feedIcon"
                 app:layout_constraintTop_toTopOf="parent" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>

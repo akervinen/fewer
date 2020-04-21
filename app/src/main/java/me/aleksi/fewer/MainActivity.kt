@@ -76,6 +76,7 @@ class MainActivity : AppCompatActivity(), OnItemClickListener {
         actionBarDrawerToggle.syncState()
 
         refreshFeedList()
+        setActiveFeed(null)
         refresh()
     }
 
@@ -127,9 +128,12 @@ class MainActivity : AppCompatActivity(), OnItemClickListener {
         FeverServerService.startActionGetFeeds(this, server!!, hash, FeedGroupReceiver(Handler()))
     }
 
-    fun setActiveFeed(feed: Feed?) {
+    private fun setActiveFeed(feed: Feed?) {
         if (feed != activeFeed) {
             activeFeed = feed
+
+            title = feed?.title ?: "All Feeds"
+
             refresh()
         }
     }

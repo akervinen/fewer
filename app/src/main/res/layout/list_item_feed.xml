@@ -4,16 +4,17 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="?selectableItemBackground"
-    android:minHeight="64dp"
+    android:minHeight="48dp"
     android:padding="16dp"
     android:paddingStart="48dp">
 
-    <TextView
-        android:id="@+id/feedList_feedPrefix"
-        android:layout_width="wrap_content"
-        android:layout_height="0dp"
-        android:gravity="center_vertical"
-        android:text="Feed: "
+    <ImageView
+        android:id="@+id/feedList_feedIcon"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:contentDescription="@string/title_all_feeds"
+        android:foregroundGravity="center_vertical"
+        android:src="@drawable/ic_baseline_list_24"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -22,10 +23,11 @@
         android:id="@+id/feedList_feedTitle"
         android:layout_width="0dp"
         android:layout_height="match_parent"
+        android:layout_marginStart="8dp"
         android:gravity="center_vertical"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/feedList_feedPrefix"
+        app:layout_constraintStart_toEndOf="@+id/feedList_feedIcon"
         app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
