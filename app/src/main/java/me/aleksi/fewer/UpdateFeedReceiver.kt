@@ -20,9 +20,15 @@ import me.aleksi.fewer.fever.FeedItemsResponse
 import me.aleksi.fewer.fever.FeverServerService
 import me.aleksi.fewer.fever.PARAM_ITEMLIST
 
+/**
+ * Receiver for Fewer background updates.
+ */
 class UpdateFeedReceiver : BroadcastReceiver() {
     private var context: Context? = null
 
+    /**
+     * Alarm broadcast received.
+     */
     override fun onReceive(context: Context?, intent: Intent?) {
         this.context = context
         Log.d("UpdateFeedReceiver", "onReceive")
@@ -57,12 +63,15 @@ class UpdateFeedReceiver : BroadcastReceiver() {
         )
     }
 
+    /**
+     * Called when [FeverServerService] returns items.
+     */
     private fun receiveItems(items: List<FeedItem>) {
         if (context == null || items.isEmpty()) return
 
         if (!items.any { it.is_read == 0 }) {
             // All have been read elsewhere already, ignore
-            return;
+            return
         }
 
         val newMax = items.maxBy { it.id }

@@ -42,6 +42,9 @@ android {
     dokka {
         outputFormat = 'html'
         outputDirectory = "$buildDir/javadoc"
+        configuration {
+            includes = ['packages.md']
+        }
     }
 
     packagingOptions {

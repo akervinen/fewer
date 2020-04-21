@@ -58,11 +58,11 @@ class FeverServerService : JobIntentService() {
      * Handle incoming intent.
      */
     override fun onHandleWork(intent: Intent) {
-        val server = intent?.getStringExtra(EXTRA_SERVER)
-        val hash = intent?.getStringExtra(EXTRA_HASH)
-        val receiver = intent?.getParcelableExtra<ResultReceiver>(EXTRA_RECEIVER)
+        val server = intent.getStringExtra(EXTRA_SERVER)
+        val hash = intent.getStringExtra(EXTRA_HASH)
+        val receiver = intent.getParcelableExtra<ResultReceiver>(EXTRA_RECEIVER)
 
-        when (intent?.action) {
+        when (intent.action) {
             ACTION_TEST_SERVER -> {
                 handleActionTestServer(server, hash)
             }
