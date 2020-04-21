@@ -41,6 +41,15 @@ class MainActivity : AppCompatActivity(), OnItemClickListener {
     private lateinit var feedItemList: RecyclerView
     private lateinit var actionBarDrawerToggle: ActionBarDrawerToggle
 
+    private val sharedPreferences
+        get() = PreferenceManager.getDefaultSharedPreferences(this)
+
+    private val prefServer
+        get() = sharedPreferences.getString(getString(R.string.pref_server), "")!!
+
+    private val prefHash
+        get() = sharedPreferences.getString(getString(R.string.pref_hash), "")!!
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -101,14 +110,10 @@ class MainActivity : AppCompatActivity(), OnItemClickListener {
     }
 
     private fun loadMore() {
-        val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
-        val server = sharedPreferences.getString(getString(R.string.pref_server), "")
-        val hash = sharedPreferences.getString(getString(R.string.pref_hash), "")
-
         FeverServerService.startActionGetItems(
             this,
-            server!!,
-            hash,
+            prefServer,
+            prefHash,
             maxItemId,
             activeFeed?.id,
             FeedItemReceiver(maxItemId != null, Handler())
@@ -121,11 +126,12 @@ class MainActivity : AppCompatActivity(), OnItemClickListener {
     }
 
     private fun refreshFeedList() {
-        val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
-        val server = sharedPreferences.getString(getString(R.string.pref_server), "")
-        val hash = sharedPreferences.getString(getString(R.string.pref_hash), "")
-
-        FeverServerService.startActionGetFeeds(this, server!!, hash, FeedGroupReceiver(Handler()))
+        FeverServerService.startActionGetFeeds(
+            this,
+            prefServer,
+            prefHash,
+            FeedGroupReceiver(Handler())
+        )
     }
 
     private fun setActiveFeed(feed: Feed?) {
@@ -191,8 +197,8 @@ class MainActivity : AppCompatActivity(), OnItemClickListener {
                 startActivity(Intent(this, SettingsActivity::class.java))
             }
             R.id.refreshAction -> {
-                refresh()
                 refreshFeedList()
+                refresh()
             }
         }
         return super.onOptionsItemSelected(item)
@@ -207,6 +213,8 @@ class MainActivity : AppCompatActivity(), OnItemClickListener {
     }
 
     override fun onItemClicked(item: FeedItem) {
+        FeverServerService.startActionReadItem(this, prefServer, prefHash, item.id)
+        item.is_read = 1
         CustomTabsIntent.Builder().build().launchUrl(this, Uri.parse(item.url))
     }
 

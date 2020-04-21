@@ -6,4 +6,6 @@ interface FeedApi {
     fun items(maxId: Long?, feedId: Long?): FeedItemList
 
     fun feeds(): List<FeedGroup>
+
+    fun markItemAsRead(id: Long)
 }

@@ -13,12 +13,14 @@ import me.aleksi.fewer.R
 private const val ACTION_TEST_SERVER = "me.aleksi.fewer.action.TEST_SERVER"
 private const val ACTION_GET_ITEMS = "me.aleksi.fewer.action.GET_ITEMS"
 private const val ACTION_GET_FEEDS = "me.aleksi.fewer.action.GET_FEEDS"
+private const val ACTION_READ_ITEM = "me.aleksi.fewer.action.READ_ITEM"
 
 private const val EXTRA_SERVER = "me.aleksi.fewer.extra.SERVER"
 private const val EXTRA_HASH = "me.aleksi.fewer.extra.HASH"
 private const val EXTRA_RECEIVER = "me.aleksi.fewer.extra.RECEIVER"
 private const val EXTRA_FEED_ID = "me.aleksi.fewer.extra.FEED_ID"
 private const val EXTRA_MAX_ID = "me.aleksi.fewer.extra.MAX_ID"
+private const val EXTRA_ITEM_ID = "me.aleksi.fewer.extra.ITEM_ID"
 
 const val PARAM_ITEMLIST = "me.aleksi.fewer.param.ITEMLIST"
 const val PARAM_FEEDLIST = "me.aleksi.fewer.param.FEEDLIST"
@@ -61,6 +63,10 @@ class FeverServerService : IntentService("FeverServerService") {
             }
             ACTION_GET_FEEDS -> {
                 handleActionGetFeeds(server, hash, receiver)
+            }
+            ACTION_READ_ITEM -> {
+                val itemId = intent.getLongExtra(EXTRA_ITEM_ID, 0)
+                handleActionReadItem(server, hash, itemId)
             }
         }
     }
@@ -148,6 +154,24 @@ class FeverServerService : IntentService("FeverServerService") {
         }
     }
 
+    private fun handleActionReadItem(server: String?, hash: String?, itemId: Long) {
+        if (server == null) return
+
+        try {
+            val client = FeverApi(server, hash.orEmpty())
+            client.markItemAsRead(itemId)
+        } catch (e: FeverApiException) {
+            Log.w(TAG, "FeverApiException: $e")
+            handler.post {
+                Toast.makeText(
+                    this,
+                    getString(R.string.test_error, e.message),
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
+    }
+
     companion object {
         const val SUCCESS = 1313
         const val ERROR = 4242
@@ -208,6 +232,22 @@ class FeverServerService : IntentService("FeverServerService") {
                 putExtra(EXTRA_SERVER, server)
                 putExtra(EXTRA_HASH, hash)
                 putExtra(EXTRA_RECEIVER, receiver)
+            }
+            context.startService(intent)
+        }
+
+        @JvmStatic
+        fun startActionReadItem(
+            context: Context,
+            server: String,
+            hash: String?,
+            itemId: Long
+        ) {
+            val intent = Intent(context, FeverServerService::class.java).apply {
+                action = ACTION_READ_ITEM
+                putExtra(EXTRA_SERVER, server)
+                putExtra(EXTRA_HASH, hash)
+                putExtra(EXTRA_ITEM_ID, itemId)
             }
             context.startService(intent)
         }

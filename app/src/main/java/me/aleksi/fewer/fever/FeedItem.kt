@@ -14,7 +14,7 @@ data class FeedItem(
     val html: String,
     val url: String,
     val is_saved: Int,
-    val is_read: Int,
+    var is_read: Int,
     val created_on_time: Long,
 
     @Transient

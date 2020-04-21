@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -7,23 +8,31 @@
     android:clickable="true"
     android:focusable="true"
     android:minHeight="@dimen/item_height"
-    android:orientation="horizontal"
     tools:showIn="@layout/fragment_all_feeds">
 
     <ImageView
         android:id="@+id/feedIcon"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
         android:layout_margin="@dimen/text_margin"
         android:contentDescription="@string/feed_icon"
-        android:gravity="center"
-        android:textAppearance="?attr/textAppearanceListItem" />
+        android:foregroundGravity="center_vertical"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintHeight_max="32dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintWidth_max="32dp" />
 
     <TextView
         android:id="@+id/itemTitle"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:layout_margin="@dimen/text_margin"
         android:gravity="center_vertical"
+        android:layout_margin="@dimen/text_margin"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/feedIcon"
+        app:layout_constraintTop_toTopOf="parent"
         android:textAppearance="?attr/textAppearanceListItem" />
-</LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

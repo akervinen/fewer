@@ -132,4 +132,15 @@ class FeverApi(private val serverPath: String, private val hash: String) :
 
         return groups.groups
     }
+
+    override fun markItemAsRead(id: Long) {
+        val reqBody = FormBody.Builder()
+            .add("api_key", hash)
+            .add("mark", "item")
+            .add("as", "read")
+            .add("id", id.toString())
+            .build()
+
+        doCall("$serverPath?api", reqBody)
+    }
 }

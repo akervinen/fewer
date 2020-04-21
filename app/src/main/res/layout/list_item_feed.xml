@@ -11,13 +11,16 @@
     <ImageView
         android:id="@+id/feedList_feedIcon"
         android:layout_width="0dp"
-        android:layout_height="match_parent"
+        android:layout_height="0dp"
         android:contentDescription="@string/title_all_feeds"
         android:foregroundGravity="center_vertical"
         android:src="@drawable/ic_baseline_list_24"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintHeight_max="32dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintWidth_max="32dp" />
 
     <TextView
         android:id="@+id/feedList_feedTitle"
