@@ -1,7 +1,6 @@
 package me.aleksi.fewer.ui
 
 import android.graphics.Typeface
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -39,7 +38,6 @@ class FeedItemAdapter(
         fun bind(item: FeedItem, clickListener: OnItemClickListener) {
             feedIcon.setImageBitmap(item.feed?.favicon)
             contentView.text = item.title
-            Log.d("TAG", "read: ${item.is_read}, item: ${item.title}, view: ${contentView}")
             if (item.is_read == 0)
                 contentView.setTypeface(null, Typeface.BOLD)
             else

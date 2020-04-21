@@ -27,4 +27,14 @@
             app:key="@string/pref_serverTest"
             app:title="@string/server_test_title" />
     </PreferenceCategory>
+
+    <PreferenceCategory android:title="@string/interface_header">
+        <DropDownPreference
+            android:defaultValue="0"
+            android:entries="@array/dayNight_entries"
+            android:entryValues="@array/dayNight_values"
+            app:key="@string/pref_daynight"
+            app:title="@string/dayNight_title"
+            app:useSimpleSummaryProvider="true" />
+    </PreferenceCategory>
 </PreferenceScreen>

@@ -17,7 +17,7 @@
         android:layout_width="@dimen/nav_width"
         android:layout_height="match_parent"
         android:layout_gravity="start"
-        android:background="@color/colorBackground"
+        android:background="?android:attr/colorBackground"
         android:clickable="true"
         android:focusable="true">
 
@@ -34,7 +34,7 @@
             android:id="@+id/feedList_allFeeds"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="?selectableItemBackground"
+            android:background="?attr/selectableItemBackground"
             android:minHeight="48dp"
             android:onClick="clickAllFeeds"
             android:padding="16dp"

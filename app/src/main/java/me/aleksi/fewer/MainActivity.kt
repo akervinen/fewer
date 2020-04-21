@@ -13,6 +13,9 @@ import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_YES
+import androidx.appcompat.app.AppCompatDelegate.setDefaultNightMode
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.core.view.GravityCompat
 import androidx.preference.PreferenceManager
@@ -49,6 +52,9 @@ class MainActivity : AppCompatActivity(), OnItemClickListener {
 
     private val prefHash
         get() = sharedPreferences.getString(getString(R.string.pref_hash), "")!!
+
+    private val prefDayNight
+        get() = sharedPreferences.getString(getString(R.string.pref_daynight), "")!!
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -87,6 +93,15 @@ class MainActivity : AppCompatActivity(), OnItemClickListener {
         refreshFeedList()
         setActiveFeed(null)
         refresh()
+
+        setDefaultNightMode(
+            when (prefDayNight) {
+                "0" -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
+                "1" -> AppCompatDelegate.MODE_NIGHT_NO
+                "2" -> MODE_NIGHT_YES
+                else -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
+            }
+        )
     }
 
     override fun onPostCreate(savedInstanceState: Bundle?, persistentState: PersistableBundle?) {

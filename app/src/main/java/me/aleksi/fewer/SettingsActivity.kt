@@ -3,10 +3,8 @@ package me.aleksi.fewer
 import android.os.Bundle
 import android.text.InputType
 import androidx.appcompat.app.AppCompatActivity
-import androidx.preference.EditTextPreference
-import androidx.preference.Preference
-import androidx.preference.PreferenceFragmentCompat
-import androidx.preference.PreferenceManager
+import androidx.appcompat.app.AppCompatDelegate.*
+import androidx.preference.*
 import me.aleksi.fewer.fever.FeverServerService
 import me.aleksi.fewer.fever.hashUserPassword
 
@@ -89,6 +87,22 @@ class SettingsActivity : AppCompatActivity() {
                     }
                     return@OnPreferenceClickListener true
                 }
+            }
+
+            val dayNightPref = findPreference<DropDownPreference>(getString(R.string.pref_daynight))
+            if (dayNightPref != null) {
+                dayNightPref.onPreferenceChangeListener =
+                    Preference.OnPreferenceChangeListener { preference, newValue ->
+                        setDefaultNightMode(
+                            when (newValue) {
+                                "0" -> MODE_NIGHT_FOLLOW_SYSTEM
+                                "1" -> MODE_NIGHT_NO
+                                "2" -> MODE_NIGHT_YES
+                                else -> MODE_NIGHT_FOLLOW_SYSTEM
+                            }
+                        )
+                        return@OnPreferenceChangeListener true
+                    }
             }
         }
     }
