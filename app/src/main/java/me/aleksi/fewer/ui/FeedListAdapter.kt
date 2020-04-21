@@ -74,8 +74,11 @@ class FeedListAdapter(groups: List<ExpandableGroup<Feed>>) :
         flatPosition: Int,
         group: ExpandableGroup<*>?
     ) {
-        holder?.setGroupTitle(group)
-        holder?.expand()
+        holder?.let {
+            it.setGroupTitle(group)
+            if (it.expanded)
+                it.collapseInstantly()
+        }
     }
 
     /**
@@ -100,6 +103,7 @@ class FeedListAdapter(groups: List<ExpandableGroup<Feed>>) :
     class FeedGroupViewHolder(itemView: View) : GroupViewHolder(itemView) {
         private val arrowIcon: ImageView = itemView.feedList_groupIcon
         private val groupTitle: TextView = itemView.feedList_groupTitle
+        var expanded = true
 
         /**
          * Set group's title.
@@ -115,7 +119,20 @@ class FeedListAdapter(groups: List<ExpandableGroup<Feed>>) :
             super.expand()
 
             val anim = RotateAnimation(180f, 360f, RELATIVE_TO_SELF, .5f, RELATIVE_TO_SELF, .5f)
-            anim.duration = 300
+            anim.duration = 250
+            anim.isFillEnabled = true
+            anim.fillBefore = true
+            anim.fillAfter = true
+            arrowIcon.animation = anim
+
+            expanded = true
+        }
+
+        fun collapseInstantly() {
+            val anim = RotateAnimation(360f, 180f, RELATIVE_TO_SELF, .5f, RELATIVE_TO_SELF, .5f)
+            anim.duration = 0
+            anim.isFillEnabled = true
+            anim.fillBefore = true
             anim.fillAfter = true
             arrowIcon.animation = anim
         }
@@ -127,9 +144,13 @@ class FeedListAdapter(groups: List<ExpandableGroup<Feed>>) :
             super.collapse()
 
             val anim = RotateAnimation(360f, 180f, RELATIVE_TO_SELF, .5f, RELATIVE_TO_SELF, .5f)
-            anim.duration = 300
+            anim.duration = 250
+            anim.isFillEnabled = true
+            anim.fillBefore = true
             anim.fillAfter = true
             arrowIcon.animation = anim
+
+            expanded = false
         }
     }
 

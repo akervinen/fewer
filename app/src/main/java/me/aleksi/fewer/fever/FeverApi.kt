@@ -138,7 +138,11 @@ class FeverApi(private val serverPath: String, private val hash: String) : FeedA
         }
 
         for (g in groups.groups) {
-            g.feeds.addAll(rels[g.id]?.mapNotNull { feeds[it] }!!)
+            if (!rels.containsKey(g.id)) continue
+
+            g.feeds.addAll(rels[g.id]?.mapNotNull {
+                feeds[it]
+            }!!)
         }
 
         return groups.groups
