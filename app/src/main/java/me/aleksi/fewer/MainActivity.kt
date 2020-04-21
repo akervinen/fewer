@@ -162,6 +162,7 @@ class MainActivity : AppCompatActivity(), OnItemClickListener {
      * Load more feed items.
      */
     private fun loadMore() {
+        loadingIcon.visibility = View.VISIBLE
         FeverServerService.startActionGetItems(
             this,
             prefServer,
@@ -199,7 +200,6 @@ class MainActivity : AppCompatActivity(), OnItemClickListener {
         title = feed?.title ?: "All Feeds"
         if (feed != activeFeed) {
             activeFeed = feed
-
             refresh()
         }
     }
@@ -314,6 +314,7 @@ class MainActivity : AppCompatActivity(), OnItemClickListener {
     private inner class FeedItemReceiver(private val addItems: Boolean, handler: Handler) :
         ResultReceiver(handler) {
         override fun onReceiveResult(resultCode: Int, resultData: Bundle?) {
+            loadingIcon.visibility = View.GONE
             when (resultCode) {
                 FeverServerService.SUCCESS -> {
                     resultData?.getParcelable<FeedItemsResponse>(PARAM_ITEMLIST)?.let {
