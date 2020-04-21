@@ -8,6 +8,7 @@ import android.os.Handler
 import android.os.ResultReceiver
 import android.util.Log
 import android.widget.Toast
+import androidx.core.app.JobIntentService
 import me.aleksi.fewer.R
 
 private const val ACTION_TEST_SERVER = "me.aleksi.fewer.action.TEST_SERVER"
@@ -20,6 +21,7 @@ private const val EXTRA_HASH = "me.aleksi.fewer.extra.HASH"
 private const val EXTRA_RECEIVER = "me.aleksi.fewer.extra.RECEIVER"
 private const val EXTRA_FEED_ID = "me.aleksi.fewer.extra.FEED_ID"
 private const val EXTRA_MAX_ID = "me.aleksi.fewer.extra.MAX_ID"
+private const val EXTRA_SINCE_ID = "me.aleksi.fewer.extra.SINCE_ID"
 private const val EXTRA_ITEM_ID = "me.aleksi.fewer.extra.ITEM_ID"
 
 /**
@@ -39,7 +41,7 @@ private const val TAG = "FeverServerService"
  *
  * Includes helper methods for making requests.
  */
-class FeverServerService : IntentService("FeverServerService") {
+class FeverServerService : JobIntentService() {
     private lateinit var handler: Handler
 
     /**
@@ -55,7 +57,7 @@ class FeverServerService : IntentService("FeverServerService") {
     /**
      * Handle incoming intent.
      */
-    override fun onHandleIntent(intent: Intent?) {
+    override fun onHandleWork(intent: Intent) {
         val server = intent?.getStringExtra(EXTRA_SERVER)
         val hash = intent?.getStringExtra(EXTRA_HASH)
         val receiver = intent?.getParcelableExtra<ResultReceiver>(EXTRA_RECEIVER)
@@ -69,11 +71,15 @@ class FeverServerService : IntentService("FeverServerService") {
                     EXTRA_MAX_ID,
                     0
                 ) else null
+                val sinceId = if (intent.hasExtra(EXTRA_SINCE_ID)) intent.getLongExtra(
+                    EXTRA_SINCE_ID,
+                    0
+                ) else null
                 val feedId = if (intent.hasExtra(EXTRA_FEED_ID)) intent.getLongExtra(
                     EXTRA_FEED_ID,
                     0
                 ) else null
-                handleActionGetItems(server, hash, maxId, feedId, receiver)
+                handleActionGetItems(server, hash, feedId, maxId, sinceId, receiver)
             }
             ACTION_GET_FEEDS -> {
                 handleActionGetFeeds(server, hash, receiver)
@@ -127,15 +133,16 @@ class FeverServerService : IntentService("FeverServerService") {
     private fun handleActionGetItems(
         server: String?,
         hash: String?,
-        maxId: Long?,
         feedId: Long?,
+        maxId: Long?,
+        sinceId: Long?,
         receiver: ResultReceiver?
     ) {
         if (server == null) return
 
         try {
             val client = FeverApi(server, hash.orEmpty())
-            val items = client.items(maxId, feedId)
+            val items = client.items(feedId, maxId, sinceId)
 
             val bundle = Bundle()
             bundle.putParcelable(PARAM_ITEMLIST, items)
@@ -224,7 +231,7 @@ class FeverServerService : IntentService("FeverServerService") {
                 putExtra(EXTRA_SERVER, server)
                 putExtra(EXTRA_HASH, hash)
             }
-            context.startService(intent)
+            enqueueWork(context, FeverServerService::class.java, 68497, intent)
         }
 
         /**
@@ -241,8 +248,9 @@ class FeverServerService : IntentService("FeverServerService") {
             context: Context,
             server: String,
             hash: String,
-            maxId: Long?,
             feedId: Long?,
+            maxId: Long?,
+            sinceId: Long?,
             itemsReceiver: ResultReceiver
         ) {
             val intent = Intent(context, FeverServerService::class.java).apply {
@@ -251,11 +259,13 @@ class FeverServerService : IntentService("FeverServerService") {
                 putExtra(EXTRA_HASH, hash)
                 if (maxId != null)
                     putExtra(EXTRA_MAX_ID, maxId)
+                if (sinceId != null)
+                    putExtra(EXTRA_SINCE_ID, sinceId)
                 if (feedId != null)
                     putExtra(EXTRA_FEED_ID, feedId)
                 putExtra(EXTRA_RECEIVER, itemsReceiver)
             }
-            context.startService(intent)
+            enqueueWork(context, FeverServerService::class.java, 68497, intent)
         }
 
         /**
@@ -280,7 +290,7 @@ class FeverServerService : IntentService("FeverServerService") {
                 putExtra(EXTRA_HASH, hash)
                 putExtra(EXTRA_RECEIVER, feedsReceiver)
             }
-            context.startService(intent)
+            enqueueWork(context, FeverServerService::class.java, 68497, intent)
         }
 
         /**
@@ -302,7 +312,7 @@ class FeverServerService : IntentService("FeverServerService") {
                 putExtra(EXTRA_HASH, hash)
                 putExtra(EXTRA_ITEM_ID, itemId)
             }
-            context.startService(intent)
+            enqueueWork(context, FeverServerService::class.java, 68497, intent)
         }
     }
 }

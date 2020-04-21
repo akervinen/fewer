@@ -28,6 +28,12 @@
             app:title="@string/server_test_title" />
     </PreferenceCategory>
 
+    <PreferenceCategory android:title="@string/updating_header">
+        <SwitchPreference
+            app:key="@string/pref_background"
+            app:title="@string/background_title" />
+    </PreferenceCategory>
+
     <PreferenceCategory android:title="@string/interface_header">
         <DropDownPreference
             android:defaultValue="0"

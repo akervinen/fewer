@@ -1,12 +1,13 @@
 package me.aleksi.fewer
 
+import android.app.AlarmManager
+import android.app.PendingIntent
+import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.content.res.Configuration
 import android.net.Uri
-import android.os.Bundle
-import android.os.Handler
-import android.os.PersistableBundle
-import android.os.ResultReceiver
+import android.os.*
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -16,6 +17,7 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_YES
 import androidx.appcompat.app.AppCompatDelegate.setDefaultNightMode
 import androidx.browser.customtabs.CustomTabsIntent
+import androidx.core.content.edit
 import androidx.core.view.GravityCompat
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -67,10 +69,26 @@ class MainActivity : AppCompatActivity(), OnItemClickListener {
         get() = sharedPreferences.getString(getString(R.string.pref_hash), "")!!
 
     /**
+     * Get "background" from preferences.
+     */
+    private val prefBackground
+        get() = sharedPreferences.getBoolean(getString(R.string.pref_background), false)
+
+    /**
      * Get "daynight" from preferences.
      */
     private val prefDayNight
         get() = sharedPreferences.getString(getString(R.string.pref_daynight), "")!!
+
+
+    private val prefsChangeListener =
+        SharedPreferences.OnSharedPreferenceChangeListener { sharedPreferences: SharedPreferences, s: String ->
+            if (s == getString(R.string.pref_background)) {
+                if (sharedPreferences.getBoolean(getString(R.string.pref_background), false)) {
+                    startUpdateTimer()
+                }
+            }
+        }
 
     /**
      * Activity created.
@@ -122,6 +140,11 @@ class MainActivity : AppCompatActivity(), OnItemClickListener {
                 else -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
             }
         )
+
+        if (prefBackground)
+            startUpdateTimer()
+
+        sharedPreferences.registerOnSharedPreferenceChangeListener(prefsChangeListener)
     }
 
     /**
@@ -158,6 +181,19 @@ class MainActivity : AppCompatActivity(), OnItemClickListener {
         feedAdapter.onRestoreInstanceState(savedInstanceState)
     }
 
+    private fun startUpdateTimer() {
+        val alarmMgr = getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        val intent = Intent(this, UpdateFeedReceiver::class.java).let {
+            PendingIntent.getBroadcast(this, 0, it, 0)
+        }
+        alarmMgr.setInexactRepeating(
+            AlarmManager.ELAPSED_REALTIME_WAKEUP,
+            SystemClock.elapsedRealtime() + AlarmManager.INTERVAL_HOUR,
+            AlarmManager.INTERVAL_HOUR,
+            intent
+        )
+    }
+
     /**
      * Load more feed items.
      */
@@ -167,8 +203,9 @@ class MainActivity : AppCompatActivity(), OnItemClickListener {
             this,
             prefServer,
             prefHash,
-            maxItemId,
             activeFeed?.id,
+            maxItemId,
+            null,
             FeedItemReceiver(maxItemId != null, Handler())
         )
     }
@@ -236,7 +273,21 @@ class MainActivity : AppCompatActivity(), OnItemClickListener {
 
         val posStart = feedItems.size
 
-        items.forEach { it.feed = getFeedById(it.feed_id) }
+        var currentMaxId = sharedPreferences.getLong("currentMaxId", 0)
+        val oldMaxId = currentMaxId
+        items.forEach {
+            it.feed = getFeedById(it.feed_id)
+
+            if (it.id > currentMaxId) {
+                currentMaxId = it.id
+            }
+        }
+        if (currentMaxId > oldMaxId) {
+            sharedPreferences.edit {
+                putLong("currentMaxId", currentMaxId)
+                apply()
+            }
+        }
 
         feedItems.addAll(items)
 

@@ -15,7 +15,7 @@ interface FeedApi {
      * Optionally items can be filtered with [maxId] to get older items, and [feedId] to get items
      * from a specific feed.
      */
-    fun items(maxId: Long?, feedId: Long?): FeedItemsResponse
+    fun items(feedId: Long? = null, maxId: Long? = null, sinceId: Long? = null): FeedItemsResponse
 
     /**
      * Get list of feeds, organized in groups.

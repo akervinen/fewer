@@ -17,6 +17,8 @@
     <string name="pref_username">username</string>
     <string name="pref_password">password</string>
     <string name="pref_hash">hash</string>
+    <string name="pref_background">background</string>
+    <string name="pref_currentMaxId">currentMaxId</string>
     <string name="pref_daynight">daynight</string>
 
     <!-- Toast messages -->
@@ -27,6 +29,7 @@
     <!-- Preference Titles -->
     <string name="server_header">Server</string>
     <string name="interface_header">Interface</string>
+    <string name="updating_header">Feed updating</string>
 
     <!-- Preferences -->
     <string name="server_title">Fever Server URL</string>
@@ -34,5 +37,10 @@
     <string name="password_title">Password</string>
     <string name="password_summary">Set your API password</string>
     <string name="server_test_title">Test Server</string>
+    <string name="background_title">Update in Background</string>
     <string name="dayNight_title">Day/Night Mode</string>
+
+    <!-- Notification -->
+    <string name="notif_title">Fewer</string>
+    <string name="notif_content">New feed items.</string>
 </resources>

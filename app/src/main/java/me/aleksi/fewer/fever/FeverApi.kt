@@ -90,10 +90,15 @@ class FeverApi(private val serverPath: String, private val hash: String) : FeedA
         )?.auth == 1
     }
 
-    override fun items(maxId: Long?, feedId: Long?): FeedItemsResponse {
+    override fun items(feedId: Long?, maxId: Long?, sinceId: Long?): FeedItemsResponse {
         val reqBodyBuilder = FormBody.Builder()
             .add("api_key", hash)
-            .add("max_id", maxId?.toString() ?: "9999999999999999")
+
+        if (sinceId != null) {
+            reqBodyBuilder.add("since_id", sinceId.toString())
+        } else {
+            reqBodyBuilder.add("max_id", maxId?.toString() ?: "9999999999999999")
+        }
 
         if (feedId != null)
             reqBodyBuilder.add("feed_ids", feedId.toString())

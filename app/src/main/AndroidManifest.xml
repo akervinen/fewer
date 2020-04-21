@@ -13,7 +13,9 @@
         android:theme="@style/AppTheme">
         <service
             android:name=".fever.FeverServerService"
-            android:exported="false" />
+            android:exported="false"
+            android:permission="android.permission.BIND_JOB_SERVICE" />
+        <receiver android:name=".UpdateFeedReceiver" />
 
         <activity
             android:name=".SettingsActivity"
@@ -22,6 +24,7 @@
 
         <activity
             android:name=".MainActivity"
+            android:launchMode="singleTask"
             android:theme="@style/AppThemeNoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
