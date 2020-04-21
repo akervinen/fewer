@@ -143,11 +143,22 @@ class MainActivity : AppCompatActivity(), OnItemClickListener {
         drawer_layout.closeDrawer(GravityCompat.START)
     }
 
+    private fun getFeedById(id: Long): Feed? {
+        feedGroups.forEach {
+            it.items.forEach { feed ->
+                if (feed.id == id) return feed
+            }
+        }
+        return null
+    }
+
     private fun addFeedItems(items: List<FeedItem>) {
         scrollLoader.loading = false
         scrollLoader.moreToLoad = items.isNotEmpty()
 
         val posStart = feedItems.size
+
+        items.forEach { it.feed = getFeedById(it.feed_id) }
 
         feedItems.addAll(items)
 
@@ -160,9 +171,9 @@ class MainActivity : AppCompatActivity(), OnItemClickListener {
     private fun setFeedItems(items: List<FeedItem>) {
         feedItems.clear()
         feedItemsFiltered.clear()
+        feedItemAdapter.notifyDataSetChanged()
 
         addFeedItems(items)
-        feedItemAdapter.notifyDataSetChanged()
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {

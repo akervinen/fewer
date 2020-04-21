@@ -10,16 +10,17 @@
     android:orientation="horizontal"
     tools:showIn="@layout/fragment_all_feeds">
 
-    <TextView
-        android:id="@+id/item_number"
+    <ImageView
+        android:id="@+id/feedIcon"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_margin="@dimen/text_margin"
+        android:contentDescription="@string/feed_icon"
         android:gravity="center"
         android:textAppearance="?attr/textAppearanceListItem" />
 
     <TextView
-        android:id="@+id/content"
+        android:id="@+id/itemTitle"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_margin="@dimen/text_margin"

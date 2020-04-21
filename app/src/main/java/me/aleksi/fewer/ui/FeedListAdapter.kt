@@ -12,6 +12,8 @@ import com.thoughtbot.expandablerecyclerview.models.ExpandableGroup
 import com.thoughtbot.expandablerecyclerview.models.ExpandableListPosition
 import com.thoughtbot.expandablerecyclerview.viewholders.ChildViewHolder
 import com.thoughtbot.expandablerecyclerview.viewholders.GroupViewHolder
+import kotlinx.android.synthetic.main.list_item_feed.view.*
+import kotlinx.android.synthetic.main.list_item_group.view.*
 import me.aleksi.fewer.R
 import me.aleksi.fewer.fever.Feed
 
@@ -42,7 +44,7 @@ class FeedListAdapter(groups: List<FeedGroup>) :
     ) {
         with(holder!!) {
             (group?.items?.get(childIndex) as Feed).let { feed: Feed ->
-                setFeedTitle(feed)
+                setFeed(feed)
                 setOnClick(View.OnClickListener { onFeedClick?.invoke(feed) })
             }
         }
@@ -69,8 +71,8 @@ class FeedListAdapter(groups: List<FeedGroup>) :
     }
 
     class FeedGroupViewHolder(itemView: View) : GroupViewHolder(itemView) {
-        private val arrowIcon: ImageView = itemView.findViewById(R.id.feedList_groupIcon)
-        private val groupTitle: TextView = itemView.findViewById(R.id.feedList_groupTitle)
+        private val arrowIcon: ImageView = itemView.feedList_groupIcon
+        private val groupTitle: TextView = itemView.feedList_groupTitle
 
         fun setGroupTitle(group: ExpandableGroup<*>?) {
             groupTitle.text = group?.title ?: "und"
@@ -96,14 +98,17 @@ class FeedListAdapter(groups: List<FeedGroup>) :
     }
 
     class FeedViewHolder(itemView: View) : ChildViewHolder(itemView) {
-        private val feedTitle: TextView = itemView.findViewById(R.id.feedList_feedTitle)
+        private val feedIcon: ImageView = itemView.feedList_feedIcon
+        private val feedTitle: TextView = itemView.feedList_feedTitle
 
         fun setOnClick(listener: View.OnClickListener?) {
             itemView.setOnClickListener(listener)
         }
 
-        fun setFeedTitle(feed: Feed) {
+        fun setFeed(feed: Feed) {
             feedTitle.text = feed.title
+            if (feed.favicon != null)
+                feedIcon.setImageBitmap(feed.favicon)
         }
     }
 }

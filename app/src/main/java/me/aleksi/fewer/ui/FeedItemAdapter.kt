@@ -1,5 +1,6 @@
 package me.aleksi.fewer.ui
 
+import android.graphics.Typeface
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -31,12 +32,14 @@ class FeedItemAdapter(
     override fun getItemCount(): Int = values.size
 
     inner class ViewHolder(private val view: View) : RecyclerView.ViewHolder(view) {
-        val idView: TextView = view.item_number
-        val contentView: TextView = view.content
+        private val feedIcon = view.feedIcon
+        private val contentView: TextView = view.itemTitle
 
         fun bind(item: FeedItem, clickListener: OnItemClickListener) {
-            idView.text = item.feed_id.toString()
+            feedIcon.setImageBitmap(item.feed?.favicon)
             contentView.text = item.title
+            if (item.is_read == 0)
+                contentView.setTypeface(contentView.typeface, Typeface.BOLD)
 
             view.setOnClickListener {
                 clickListener.onItemClicked(item)

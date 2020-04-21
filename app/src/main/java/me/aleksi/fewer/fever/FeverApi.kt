@@ -1,5 +1,7 @@
 package me.aleksi.fewer.fever
 
+import android.graphics.BitmapFactory
+import android.util.Base64
 import com.squareup.moshi.JsonDataException
 import com.squareup.moshi.Moshi
 import okhttp3.FormBody
@@ -105,14 +107,27 @@ class FeverApi(private val serverPath: String, private val hash: String) :
             doCall("$serverPath?api&feeds", reqBody)
         )!!.feeds.associateBy { it.id }
 
+        val icons = moshi.adapter(FeedFaviconsResponse::class.java).fromJson(
+            doCall("$serverPath?api&favicons", reqBody)
+        )!!.favicons.associateBy { it.id }
+
+        feeds.forEach { (_, feed) ->
+            val data = icons[feed.favicon_id]?.data
+
+            if (data != null) {
+                val cleanedBase64 = data.substringAfter(',')
+                val decoded = Base64.decode(cleanedBase64, Base64.DEFAULT)
+                val bitmap = BitmapFactory.decodeByteArray(decoded, 0, decoded.size)
+                feed.favicon = bitmap
+            }
+        }
+
         val rels = groups.feeds_groups.associate {
             Pair(it.group_id, it.feed_ids.split(',').map { id -> id.toLong() })
         }
 
         for (g in groups.groups) {
-            g.feeds.addAll(rels[g.id]?.mapNotNull { it: Long ->
-                feeds[it]
-            }!!)
+            g.feeds.addAll(rels[g.id]?.mapNotNull { feeds[it] }!!)
         }
 
         return groups.groups

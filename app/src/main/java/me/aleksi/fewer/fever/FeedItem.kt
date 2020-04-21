@@ -15,5 +15,8 @@ data class FeedItem(
     val url: String,
     val is_saved: Int,
     val is_read: Int,
-    val created_on_time: Long
+    val created_on_time: Long,
+
+    @Transient
+    var feed: Feed? = null
 ) : Parcelable

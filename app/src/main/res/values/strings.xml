@@ -30,4 +30,5 @@
     <string name="password_title">Password</string>
     <string name="password_summary">Set your API password</string>
     <string name="server_test_title">Test Server</string>
+    <string name="feed_icon">Feed Icon</string>
 </resources>
