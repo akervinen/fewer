@@ -16,26 +16,42 @@ import kotlinx.android.synthetic.main.list_item_feed.view.*
 import kotlinx.android.synthetic.main.list_item_group.view.*
 import me.aleksi.fewer.R
 import me.aleksi.fewer.fever.Feed
+import me.aleksi.fewer.fever.FeedGroup
 
-class FeedListAdapter(groups: List<FeedGroup>) :
+/**
+ * [ExpandableRecyclerViewAdapter] to display expandable groups of feeds.
+ */
+class FeedListAdapter(groups: List<ExpandableGroup<Feed>>) :
     ExpandableRecyclerViewAdapter<FeedListAdapter.FeedGroupViewHolder, FeedListAdapter.FeedViewHolder>(
         groups
     ) {
 
+    /**
+     * Callback for clicking a feed.
+     */
     var onFeedClick: ((feed: Feed) -> Unit)? = null
 
+    /**
+     * Create a ViewHolder for a group of feeds using layout `list_item_group`.
+     */
     override fun onCreateGroupViewHolder(parent: ViewGroup?, viewType: Int): FeedGroupViewHolder {
         val view = LayoutInflater.from(parent!!.context)
             .inflate(R.layout.list_item_group, parent, false)
         return FeedGroupViewHolder(view)
     }
 
+    /**
+     * Create a ViewHolder for a single feed using layout `list_item_feed`.
+     */
     override fun onCreateChildViewHolder(parent: ViewGroup?, viewType: Int): FeedViewHolder {
         val view = LayoutInflater.from(parent!!.context)
             .inflate(R.layout.list_item_feed, parent, false)
         return FeedViewHolder(view)
     }
 
+    /**
+     * Bind a [Feed] to a [FeedViewHolder].
+     */
     override fun onBindChildViewHolder(
         holder: FeedViewHolder?,
         flatPosition: Int,
@@ -50,6 +66,9 @@ class FeedListAdapter(groups: List<FeedGroup>) :
         }
     }
 
+    /**
+     * Bind a [FeedGroup] to a [FeedGroupViewHolder].
+     */
     override fun onBindGroupViewHolder(
         holder: FeedGroupViewHolder?,
         flatPosition: Int,
@@ -59,6 +78,11 @@ class FeedListAdapter(groups: List<FeedGroup>) :
         holder?.expand()
     }
 
+    /**
+     * Expand all feed groups.
+     *
+     * Does not correctly toggle group arrow animation!
+     */
     fun expandAll() {
         groups.forEachIndexed { index, _ ->
             val groupIdx = expandableList.getFlattenedGroupIndex(
@@ -70,14 +94,23 @@ class FeedListAdapter(groups: List<FeedGroup>) :
         }
     }
 
+    /**
+     * ViewHolder for [FeedGroup].
+     */
     class FeedGroupViewHolder(itemView: View) : GroupViewHolder(itemView) {
         private val arrowIcon: ImageView = itemView.feedList_groupIcon
         private val groupTitle: TextView = itemView.feedList_groupTitle
 
+        /**
+         * Set group's title.
+         */
         fun setGroupTitle(group: ExpandableGroup<*>?) {
             groupTitle.text = group?.title ?: "und"
         }
 
+        /**
+         * Expand animation for arrow.
+         */
         override fun expand() {
             super.expand()
 
@@ -87,6 +120,9 @@ class FeedListAdapter(groups: List<FeedGroup>) :
             arrowIcon.animation = anim
         }
 
+        /**
+         * Collapse animation for arrow.
+         */
         override fun collapse() {
             super.collapse()
 
@@ -97,14 +133,23 @@ class FeedListAdapter(groups: List<FeedGroup>) :
         }
     }
 
+    /**
+     * ViewHolder for a [Feed].
+     */
     class FeedViewHolder(itemView: View) : ChildViewHolder(itemView) {
         private val feedIcon: ImageView = itemView.feedList_feedIcon
         private val feedTitle: TextView = itemView.feedList_feedTitle
 
-        fun setOnClick(listener: View.OnClickListener?) {
-            itemView.setOnClickListener(listener)
+        /**
+         * Set an [onClickListener] for this feed.
+         */
+        fun setOnClick(onClickListener: View.OnClickListener?) {
+            itemView.setOnClickListener(onClickListener)
         }
 
+        /**
+         * Bind a [feed] to this ViewHolder, setting feed title and icon.
+         */
         fun setFeed(feed: Feed) {
             feedTitle.text = feed.title
             if (feed.favicon != null)

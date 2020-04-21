@@ -10,19 +10,30 @@ import okhttp3.Request
 import java.io.IOException
 import java.security.MessageDigest
 
+/**
+ * Hash username + password for Fever API use.
+ */
 fun hashUserPassword(username: String, password: String): String {
     val combined = "$username:$password"
     val bytes = MessageDigest.getInstance("MD5").digest(combined.toByteArray(Charsets.UTF_8))
     return bytes.joinToString("") { "%02x".format(it) }
 }
 
+/**
+ * Fever API error.
+ */
 class FeverApiException : Exception {
     constructor(message: String) : super(message)
     constructor(message: String, cause: Exception) : super(message, cause)
 }
 
-class FeverApi(private val serverPath: String, private val hash: String) :
-    FeedApi {
+/**
+ * Implementation of [FeedApi] for Fever.
+ *
+ * [serverPath] should point to `fever.php` or equivalent, [hash] should be Fever-compatible
+ * authentication hash ([hashUserPassword]).
+ */
+class FeverApi(private val serverPath: String, private val hash: String) : FeedApi {
     private val httpClient: OkHttpClient = OkHttpClient()
     private val moshi: Moshi = Moshi.Builder().build()
 
@@ -79,7 +90,7 @@ class FeverApi(private val serverPath: String, private val hash: String) :
         )?.auth == 1
     }
 
-    override fun items(maxId: Long?, feedId: Long?): FeedItemList {
+    override fun items(maxId: Long?, feedId: Long?): FeedItemsResponse {
         val reqBodyBuilder = FormBody.Builder()
             .add("api_key", hash)
             .add("max_id", maxId?.toString() ?: "9999999999999999")
@@ -89,7 +100,7 @@ class FeverApi(private val serverPath: String, private val hash: String) :
 
         val reqBody = reqBodyBuilder.build()
 
-        return moshi.adapter(FeedItemList::class.java).fromJson(
+        return moshi.adapter(FeedItemsResponse::class.java).fromJson(
             doCall("$serverPath?api&items", reqBody)
         )!!
     }

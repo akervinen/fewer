@@ -22,25 +22,39 @@ private const val EXTRA_FEED_ID = "me.aleksi.fewer.extra.FEED_ID"
 private const val EXTRA_MAX_ID = "me.aleksi.fewer.extra.MAX_ID"
 private const val EXTRA_ITEM_ID = "me.aleksi.fewer.extra.ITEM_ID"
 
+/**
+ * Receiver parameter for a list of items, returned by `GetItems`
+ */
 const val PARAM_ITEMLIST = "me.aleksi.fewer.param.ITEMLIST"
+
+/**
+ * Receiver parameter for a list of feeds, returned by `GetFeeds`
+ */
 const val PARAM_FEEDLIST = "me.aleksi.fewer.param.FEEDLIST"
-const val PARAM_GROUPLIST = "me.aleksi.fewer.param.GROUPLIST"
 
 private const val TAG = "FeverServerService"
 
 /**
- * An [IntentService] subclass for handling asynchronous task requests in
- * a service on a separate handler thread.
- * helper methods.
+ * A service for handling requests to a Fever-compatible server.
+ *
+ * Includes helper methods for making requests.
  */
 class FeverServerService : IntentService("FeverServerService") {
     private lateinit var handler: Handler
 
+    /**
+     * Service created.
+     *
+     * Creates a handler for posting message toasts.
+     */
     override fun onCreate() {
         super.onCreate()
         handler = Handler()
     }
 
+    /**
+     * Handle incoming intent.
+     */
     override fun onHandleIntent(intent: Intent?) {
         val server = intent?.getStringExtra(EXTRA_SERVER)
         val hash = intent?.getStringExtra(EXTRA_HASH)
@@ -71,6 +85,9 @@ class FeverServerService : IntentService("FeverServerService") {
         }
     }
 
+    /**
+     * Test server and authentication.
+     */
     private fun handleActionTestServer(server: String?, hash: String?) {
         if (server == null) return
 
@@ -104,6 +121,9 @@ class FeverServerService : IntentService("FeverServerService") {
         }
     }
 
+    /**
+     * Get list of items, optionally filtering by max id and feed.
+     */
     private fun handleActionGetItems(
         server: String?,
         hash: String?,
@@ -122,6 +142,7 @@ class FeverServerService : IntentService("FeverServerService") {
             receiver?.send(SUCCESS, bundle)
         } catch (e: FeverApiException) {
             Log.w(TAG, "FeverApiException: $e")
+            receiver?.send(ERROR, null)
             handler.post {
                 Toast.makeText(
                     this,
@@ -132,6 +153,9 @@ class FeverServerService : IntentService("FeverServerService") {
         }
     }
 
+    /**
+     * Get list of feeds.
+     */
     private fun handleActionGetFeeds(server: String?, hash: String?, receiver: ResultReceiver?) {
         if (server == null) return
 
@@ -144,6 +168,7 @@ class FeverServerService : IntentService("FeverServerService") {
             receiver?.send(SUCCESS, bundle)
         } catch (e: FeverApiException) {
             Log.w(TAG, "FeverApiException: $e")
+            receiver?.send(ERROR, null)
             handler.post {
                 Toast.makeText(
                     this,
@@ -154,6 +179,9 @@ class FeverServerService : IntentService("FeverServerService") {
         }
     }
 
+    /**
+     * Mark item as read.
+     */
     private fun handleActionReadItem(server: String?, hash: String?, itemId: Long) {
         if (server == null) return
 
@@ -173,7 +201,14 @@ class FeverServerService : IntentService("FeverServerService") {
     }
 
     companion object {
+        /**
+         * Fever request was successful.
+         */
         const val SUCCESS = 1313
+
+        /**
+         * Fever request failed.
+         */
         const val ERROR = 4242
 
         /**
@@ -196,16 +231,19 @@ class FeverServerService : IntentService("FeverServerService") {
          * Starts this service to perform action GetItems with the given parameters. If
          * the service is already performing a task this action will be queued.
          *
+         * [itemsReceiver] receives a [FeedItemsResponse] object as [PARAM_ITEMLIST] if
+         * the request was a [SUCCESS].
+         *
          * @see IntentService
          */
         @JvmStatic
         fun startActionGetItems(
             context: Context,
             server: String,
-            hash: String?,
+            hash: String,
             maxId: Long?,
             feedId: Long?,
-            receiver: ResultReceiver
+            itemsReceiver: ResultReceiver
         ) {
             val intent = Intent(context, FeverServerService::class.java).apply {
                 action = ACTION_GET_ITEMS
@@ -215,27 +253,42 @@ class FeverServerService : IntentService("FeverServerService") {
                     putExtra(EXTRA_MAX_ID, maxId)
                 if (feedId != null)
                     putExtra(EXTRA_FEED_ID, feedId)
-                putExtra(EXTRA_RECEIVER, receiver)
+                putExtra(EXTRA_RECEIVER, itemsReceiver)
             }
             context.startService(intent)
         }
 
+        /**
+         * Starts this service to perform action GetFeeds with the given parameters. If
+         * the service is already performing a task this action will be queued.
+         *
+         * [feedsReceiver] receives an [ArrayList] of [FeedGroup]s as [PARAM_FEEDLIST] if
+         * the request was a [SUCCESS].
+         *
+         * @see IntentService
+         */
         @JvmStatic
         fun startActionGetFeeds(
             context: Context,
             server: String,
-            hash: String?,
-            receiver: ResultReceiver
+            hash: String,
+            feedsReceiver: ResultReceiver
         ) {
             val intent = Intent(context, FeverServerService::class.java).apply {
                 action = ACTION_GET_FEEDS
                 putExtra(EXTRA_SERVER, server)
                 putExtra(EXTRA_HASH, hash)
-                putExtra(EXTRA_RECEIVER, receiver)
+                putExtra(EXTRA_RECEIVER, feedsReceiver)
             }
             context.startService(intent)
         }
 
+        /**
+         * Starts this service to perform action ReadItem with the given parameters. If
+         * the service is already performing a task this action will be queued.
+         *
+         * @see IntentService
+         */
         @JvmStatic
         fun startActionReadItem(
             context: Context,
